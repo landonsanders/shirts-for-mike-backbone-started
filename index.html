@@ -1,0 +1,148 @@
+<!doctype html>
+	<html>
+		<head>
+			<title>Shirts for Mike, with Backbone</title>
+			<link rel="stylesheet" type="text/css" href="css/grid.css">
+			<link rel="stylesheet" type="text/css" href="css/style.css">
+		</head>
+		<body>
+			<div class="header-wrapper">
+				<div class="container">
+					<div class="grid-12">
+						<div class="header">
+							<h1><a href="index.html">Shirts for Mike, with Backbone</a></h1>
+					</div>
+				</div>
+			</div>
+			</div>
+			<div class="container" id="main">
+				<h2>The Full Catalog</h2>
+			</div>
+			<div class="wrapper">
+				<div class="container" id="footer">
+					<div class="box">
+						<ul>		
+							<li><a href="http://twitter.com/landonsanders">Twitter</a> |</li>
+							<li><a href="https://www.facebook.com/landon.sanders">Facebook</a> |</li>			
+							<li>&copy;2015 Joe Q. Doe</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+	
+			<script type="text/template" id="shirt-template">
+					<a href="<%= location %>"><img src="<%= img %>"></a>
+			</script>
+
+			<script src="js/vendor/jquery.js"></script>
+			<script src="js/vendor/underscore.js"></script>
+			<script src="js/vendor/backbone.js"></script>
+
+			<script>
+				var DATA = [
+					{
+						id: 101,
+						shirt: 'Shirt 101', 
+						img: 'img/shirt-101.jpg',
+						location: '#shirts/101'},
+					{
+						id: 102,
+						shirt: 'Shirt 102', 
+						img: 'img/shirt-102.jpg',
+						location: '#shirts/102'},
+					{
+						id: 103,
+						shirt: 'Shirt 103', 
+						img: 'img/shirt-103.jpg',
+						location: '#shirts/103'},
+					{	
+						id: 104,
+						shirt: 'Shirt 104', 
+						img: 'img/shirt-104.jpg',
+						location: '#shirts/104'},
+					{
+						id: 105,
+						shirt: 'Shirt 105', 	
+						img: 'img/shirt-105.jpg',
+						location: '#shirts/105'},
+					{
+						id: 106,
+						shirt: 'Shirt 106', 
+						img: 'img/shirt-106.jpg',
+						location: '#shirts/106'},
+					{
+						id: 107,
+						shirt: 'Shirt 107', 
+						img: 'img/shirt-107.jpg',
+						location: '#shirts/107'},
+					{
+						id: 108,
+						shirt: 'Shirt 108', 
+						img: 'img/shirt-108.jpg',
+						location: '#shirts/107'}
+				];
+
+				var Model = Backbone.Model.extend({
+					defaults: {
+						shirt: 'Shirt 108', 
+						img: 'img/shirt-108.jpg'}
+				});
+
+				var View = Backbone.View.extend({
+					tagName: 'div',
+					className: 'grid-3',
+					template: _.template(jQuery('#shirt-template').html()),
+					render: function () {
+						var html = this.template(this.model.toJSON());
+						this.$el.html(html);}
+				});
+	
+				var Collection = Backbone.Collection.extend({
+					model: Model
+				});
+
+				var CollectionView = Backbone.View.extend({
+					el: jQuery('#main'),
+					render: function () {
+						this.collection.each(function (item) {
+							var view = new View({model: item});
+							view.render();
+							this.$el.append(view.el);}, this);}
+				});
+				
+				var list = new Collection(DATA), listView = new CollectionView({collection: list});
+	
+				listView.render();
+
+				var Router = Backbone.Router.extend({
+					routes: {
+						'shirts/:id': 'handler',
+						'': 'defaultRoute'
+
+					}});
+				
+				var router = new Router;
+
+				router.on('route:defaultRoute', function () {
+					console.log('Default route');
+				});
+
+				router.on('route:handler', function (id) {
+					id = parseInt(id, 10);
+					var item = list.get(id);
+
+					var view = new View({model: item});
+					view.render();
+					
+					var $main = jQuery('#main');
+					var $heading = jQuery('<h2>' + item.get('shirt') + '</h2>'); 
+
+					$main.empty();
+					$main.append($heading);
+					jQuery('#main').append(view.el);});
+
+				Backbone.history.start();
+			</script>
+		</body>
+	</html>
+
